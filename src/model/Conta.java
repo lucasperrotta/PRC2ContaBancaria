@@ -17,6 +17,10 @@ public abstract class Conta {
     public abstract void sacar(double Valor) throws SaldoInsuficienteException;
     
     public void depositar(double valor) {
-        this.saldo += saldo;
+        if (valor < 0) {
+            this.saldo += saldo;
+        } else {
+            IO.println("Valor para depósito deve ser maior do que 0");
+        }
     }
 }
