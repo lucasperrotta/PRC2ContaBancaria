@@ -15,4 +15,8 @@ public abstract class Conta {
     protected double saldo;
     
     public abstract void sacar(double Valor) throws SaldoInsuficienteException;
+    
+    public void depositar(double valor) {
+        this.saldo += saldo;
+    }
 }
