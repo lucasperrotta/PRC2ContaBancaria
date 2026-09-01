@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package model;
+import exception.SaldoInsuficienteException;
 
 /**
  *
@@ -12,4 +13,6 @@ public abstract class Conta {
     protected int numero;
     protected String titular;
     protected double saldo;
+    
+    public abstract void sacar(double Valor) throws SaldoInsuficienteException;
 }
