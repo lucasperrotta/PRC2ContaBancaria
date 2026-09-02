@@ -8,6 +8,8 @@ package exception;
  *
  * @author cg3032515
  */
-public class SaldoInsuficienteException {
-    
+public class SaldoInsuficienteException extends Exception {
+    public SaldoInsuficienteException(String mensagem) {
+        super(mensagem);
+    }
 }
