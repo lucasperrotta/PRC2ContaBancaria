@@ -1,13 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package app;
-
-/**
- *
- * @author lucasperrottabarbosa
- */
+import model.ContaCorrente;
+import exception.SaldoInsuficienteException;
 public class Main {
 
     /**
@@ -16,6 +9,13 @@ public class Main {
     public static void main(String[] args) {
         // TODO code application logic here
         System.out.println("Olá Gerenciador de Contas!");
+        ContaCorrente c = new ContaCorrente(0, "Lucas", 8000);
+        
+        try {
+            c.sacar(100000);
+        } catch(SaldoInsuficienteException e) {
+            IO.println("erro: "+e.getMessage());
+        }
     }
     
 }
