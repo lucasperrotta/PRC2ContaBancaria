@@ -16,12 +16,13 @@ public class Main {
         
 
         ContaService cs = new ContaService();
-
+        
         try {
+            double valorSaque = Double.parseDouble(IO.readln("Valor pra saque: R$"));
             ContaCorrente c = cs.lerContas("conta.txt");
             cs.addConta(c);
             try {
-                cs.solicitaSaque(c,100000);
+                cs.solicitaSaque(c,valorSaque);
             } catch (SaldoInsuficienteException e) {
                 IO.println("erro: " + e.getMessage());
             }
