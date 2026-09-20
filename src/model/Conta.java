@@ -10,7 +10,7 @@ public abstract class Conta {
     
     public void depositar(double valor) {
         if (valor < 0) {
-            this.saldo += saldo;
+            this.saldo += valor;
         } else {
             IO.println("Valor para depósito deve ser maior do que 0");
         }
