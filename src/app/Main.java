@@ -18,7 +18,7 @@ public class Main {
         ContaService cs = new ContaService();
 
         try {
-            ContaCorrente c = cs.lerConta("conta.txt");
+            ContaCorrente c = cs.lerContas("conta.txt");
             cs.addConta(c);
             try {
                 cs.solicitaSaque(c,100000);
