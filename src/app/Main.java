@@ -5,51 +5,106 @@ import service.ContaService;
 import exception.SaldoInsuficienteException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        // TODO code application logic here
-        System.out.println("Olá Gerenciador de Contas!");
-        
-
         ContaService cs = new ContaService();
-        
-        try {
-            List<ContaCorrente> contas = cs.lerContas("conta.txt");
-            int contaOperacao = Integer.parseInt(IO.readln("Número da conta para operar: "));
-            
-            
-            
-            ContaCorrente c = contas.get(contaOperacao);
-            IO.println("Conta selecionada:");
-            c.imprimirConta();
-            int operacao = Integer.parseInt(IO.readln("1 para saque 2 para dep: "));
-            switch (operacao) {
-                case 1:
-                    double valorSaque = Double.parseDouble(IO.readln("Valor para saque: R$"));
-                    try {
-                cs.solicitaSaque(c,valorSaque);
-            } catch (SaldoInsuficienteException e) {
-                IO.println("erro: " + e.getMessage());
-            }
-                    break;
-                default:
-                    throw new AssertionError();
-            }
-            cs.addConta(c);
-            
-            cs.atualizaContas(c, "conta_atualizada.txt");
-        } catch (IOException e) {
-              IO.println("Erro de arquivo: Verifique se 'conta.txt' existe na raiz do projeto.\n"+e.getMessage());
-        } catch (NumberFormatException e) {
-            IO.println("Erro: Por favor, digite um valor numérico válido (ex: 500.00).\n"+e.getMessage());
-        }
-        cs.listarContas();
-        
-    }
+        boolean rodando = true;
 
+        try {
+            // Carrega as contas do arquivo na inicialização
+            cs.lerContas("contas.txt");
+            // ... dentro do main, após carregar as contas ...
+
+            IO.println("\n=== DESAFIO STREAMS (AULA 03) ===");
+
+// 1. Testando o Filtro
+            IO.println("\n1. Contas com saldo > R$ 10.000:");
+            List<ContaCorrente> contasRicas = cs.filtrarContasRicas();
+            if (contasRicas.isEmpty()) {
+                IO.println("Nenhuma conta encontrada com esse saldo.");
+            } else {
+                contasRicas.forEach(ContaCorrente::imprimirConta); // Method Reference
+            }
+
+// 2. Testando o Reduce (Saldo Total)
+            IO.println("\n2. Saldo Total do Banco:");
+            double total = cs.calcularSaldoTotal();
+            IO.println("Total em caixa: R$ " + total);
+
+// 3. Testando o GroupingBy (Agrupamento)
+            IO.println("\n3. Contas Agrupadas por Faixa de Saldo:");
+            Map<String, List<ContaCorrente>> faixas = cs.agruparPorFaixaDeSaldo();
+
+// Iterando sobre o Map (Chave = Faixa, Valor = Lista de Contas)
+            faixas.forEach((faixa, listaDeContas) -> {
+                IO.println("\n--- Faixa: " + faixa + " ---");
+                listaDeContas.forEach(c -> IO.println("   * " + c.getTitular() + " (R$ " + c.getSaldo() + ")"));
+            });
+            while (rodando) {
+                IO.println("\n=== GERENCIADOR DE CONTAS BANCÁRIAS ===");
+                IO.println("Contas cadastradas:");
+                cs.listarContas();
+
+                IO.println("\n[1] Operar em uma conta existente (Saque/Depósito)");
+                IO.println("[2] Adicionar nova conta");
+                IO.println("[0] Sair e Salvar");
+                String opcaoMenu = IO.readln("Escolha uma opção: ");
+
+                switch (opcaoMenu) {
+                    case "1" -> {
+                        // Usuário digita o NÚMERO da conta, não o índice
+                        int numConta = Integer.parseInt(IO.readln("Digite o número da conta: "));
+                        ContaCorrente contaAlvo = cs.buscarPorNumero(numConta)
+                                .orElseThrow(() -> new RuntimeException("Conta não encontrada!"));
+
+                        if (contaAlvo == null) {
+                            IO.println("❌ Conta não encontrada!");
+                        } else {
+                            IO.println("\nConta selecionada: " + contaAlvo.getTitular() + " (Saldo: R$ " + contaAlvo.getSaldo() + ")");
+                            IO.println("[1] Sacar");
+                            IO.println("[2] Depositar");
+                            String opOperacao = IO.readln("Operação: ");
+
+                            double valor = Double.parseDouble(IO.readln("Valor: R$ "));
+
+                            if (opOperacao.equals("1")) {
+                                try {
+                                    cs.solicitaSaque(contaAlvo, valor);
+                                    IO.println("✅ Saque realizado!");
+                                } catch (SaldoInsuficienteException e) {
+                                    IO.println(" " + e.getMessage());
+                                }
+                            } else if (opOperacao.equals("2")) {
+                                cs.solicitaDeposito(contaAlvo, valor);
+                                IO.println("✅ Depósito realizado!");
+                            }
+                        }
+                    }
+
+                    case "2" -> {
+                        int novoNum = Integer.parseInt(IO.readln("Número da nova conta: "));
+                        String novoTitular = IO.readln("Titular: ");
+                        double novoSaldo = Double.parseDouble(IO.readln("Saldo inicial: R$ "));
+                        cs.adicionarNovaConta(novoNum, novoTitular, novoSaldo);
+                    }
+
+                    case "0" -> {
+                        cs.atualizaContas(cs.getContasCorrentes().get(0), "contas_atualizadas.txt"); // Salva tudo
+                        IO.println("💾 Dados salvos. Até logo!");
+                        rodando = false;
+                    }
+
+                    default ->
+                        IO.println("Opção inválida!");
+                }
+            }
+        } catch (IOException e) {
+            IO.println("Erro de arquivo: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            IO.println("Erro: Digite apenas números válidos.");
+        }
+    }
 }
