@@ -6,6 +6,7 @@ import exception.SaldoInsuficienteException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import strategy.TarifaStrategy;
 
 public class Main {
 
@@ -43,6 +44,32 @@ public class Main {
                 IO.println("\n--- Faixa: " + faixa + " ---");
                 listaDeContas.forEach(c -> IO.println("   * " + c.getTitular() + " (R$ " + c.getSaldo() + ")"));
             });
+            IO.println("\n=== AULA 04 - STRATEGY, PREDICATE E COMPARATOR ===");
+            
+            // 1. Testando PREDICATE
+            IO.println("\n--- Contas com saldo > R$ 5.000 ---");
+            cs.filtrarSaldoMaiorQue5000().forEach(ContaCorrente::imprimirConta);
+            
+            IO.println("\n--- Contas com número par ---");
+            cs.filtrarNumeroPar().forEach(ContaCorrente::imprimirConta);
+
+            // 2. Testando COMPARATOR
+            IO.println("\n--- Ordenando por saldo decrescente ---");
+            cs.ordenarPorSaldoDecrescente();
+            cs.listarContas();
+            
+            IO.println("\n--- Ordenando por nome alfabético ---");
+            cs.ordenarPorTitularAlfabetico();
+            cs.listarContas();
+
+            // 3. Testando STRATEGY (Enum)
+            IO.println("\n--- Aplicando tarifa PERCENTUAL (1%) ---");
+            cs.aplicarTarifa(TarifaStrategy.PERCENTUAL);
+            cs.listarContas();
+            
+            // Salva o estado final
+            cs.atualizaContas(cs.getContasCorrentes().get(0), "contas_atualizadas.txt");
+
             while (rodando) {
                 IO.println("\n=== GERENCIADOR DE CONTAS BANCÁRIAS ===");
                 IO.println("Contas cadastradas:");

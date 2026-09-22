@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.nio.file.*;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors; // Importante para o groupingBy
+import strategy.TarifaStrategy;
 
 /**
  *
@@ -83,23 +86,23 @@ public class ContaService {
                 .filter(c -> c.getNumero() == numero)
                 .findFirst();
     }
-    
+
     // ✅ REQUISITO 1: Filtrar contas com saldo > 10000
     public List<ContaCorrente> filtrarContasRicas() {
         return contasCorrentes.stream()
                 .filter(c -> c.getSaldo() > 10000) // Predicate (Lambda)
                 .collect(Collectors.toList());     // Operação Terminal
     }
-    
-     // ✅ REQUISITO 2: Calcular saldo total (usando reduce() conforme pedido no PDF)
+
+    // ✅ REQUISITO 2: Calcular saldo total (usando reduce() conforme pedido no PDF)
     public double calcularSaldoTotal() {
         // O mapToDouble extrai o saldo de cada conta.
         // O reduce() soma tudo/*,*/ começando do 0.
         return contasCorrentes.stream()
-                .mapToDouble(ContaCorrente::getSaldo) 
-                .reduce(0, Double::sum); 
+                .mapToDouble(ContaCorrente::getSaldo)
+                .reduce(0, Double::sum);
     }
-    
+
     // ✅ REQUISITO 3: Agrupar contas por faixa de saldo (groupingBy)
     public Map<String, List<ContaCorrente>> agruparPorFaixaDeSaldo() {
         return contasCorrentes.stream()
@@ -114,9 +117,44 @@ public class ContaService {
                     }
                 }));
     }
+
     /*filter(c -> c.getSaldo() > 10000): É o equivalente ao WHERE saldo > 10000 do SQL. A lambda c -> ... é o Predicate.
 reduce(0, Double::sum): O PDF pediu reduce(). Ele funciona como um acumulador. O 0 é o valor inicial, e Double::sum é a operação que ele faz a cada passo (soma o acumulado com o próximo saldo).
 Nota: Você poderia usar .sum() direto no mapToDouble, mas como a professora pediu reduce(), usamos essa forma para garantir a nota.
 Collectors.groupingBy(...): É o equivalente ao GROUP BY do SQL. A lambda dentro dele define a chave do grupo. O resultado é sempre um Map<Chave, ListaDeObjetos>
 /*/
+    // ✅ REQUISITO 1: PREDICATE (Filtragem)
+    public List<ContaCorrente> filtrarSaldoMaiorQue5000() {
+        Predicate<ContaCorrente> saldoAlto = c -> c.getSaldo() > 5000;
+        return contasCorrentes.stream()
+                .filter(saldoAlto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ContaCorrente> filtrarNumeroPar() {
+        Predicate<ContaCorrente> numeroPar = c -> c.getNumero() % 2 == 0;
+        return contasCorrentes.stream()
+                .filter(numeroPar)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ REQUISITO 2: COMPARATOR (Ordenação com Lambda)
+    public void ordenarPorSaldoDecrescente() {
+        Comparator<ContaCorrente> porSaldo = (c1, c2) -> Double.compare(c2.getSaldo(), c1.getSaldo());
+        contasCorrentes.sort(porSaldo);
+    }
+
+    public void ordenarPorTitularAlfabetico() {
+        Comparator<ContaCorrente> porNome = (c1, c2) -> c1.getTitular().compareToIgnoreCase(c2.getTitular());
+        contasCorrentes.sort(porNome);
+    }
+
+    // ✅ REQUISITO 3: STRATEGY (Enum de Tarifa)
+    public void aplicarTarifa(TarifaStrategy estrategia) {
+        for (ContaCorrente c : contasCorrentes) {
+            double valorTarifa = estrategia.calcular(c.getSaldo());
+            c.setSaldo(c.getSaldo() - valorTarifa);
+            System.out.printf("Tarifa de R$ %.2f aplicada na conta de %s.%n", valorTarifa, c.getTitular());
+        }
+    }
 }
