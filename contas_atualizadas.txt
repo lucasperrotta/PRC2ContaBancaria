@@ -1,0 +1,4 @@
+0, 'Lucas Perrotta Barbosa', 420000.0
+1, 'Amanda Perrotta Barbosa', 840003.0
+2, 'Fabiana Perrotta', 1060000.0
+125, Domingos, 400.0
