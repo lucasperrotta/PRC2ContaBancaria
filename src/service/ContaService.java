@@ -29,24 +29,33 @@ public class ContaService {
         }
     }
 
-    public ContaCorrente lerContas(String caminho) throws IOException {
+    public List<ContaCorrente> lerContas(String caminho) throws IOException {
         Path path = Paths.get(caminho);
-        List<String> linhas = Files.readAllLines(path);
-        String[] infosConta = linhas.get(0).split(",");
-        int numero = Integer.parseInt(infosConta[0].trim());
-        String titular = infosConta[1].trim();
-        double saldoInicial = Double.parseDouble(infosConta[2]);
-        return new ContaCorrente(numero, titular, saldoInicial);
+        List<String> infoContas = Files.readAllLines(path);
+        
+        for (String infoConta : infoContas) {
+            String[] splitConta = infoConta.split(",");
+            int numero = Integer.parseInt(splitConta[0].trim());
+            String titular = splitConta[1].trim();
+            double saldoInicial = Double.parseDouble(splitConta[2]);
+            contasCorrentes.add(new ContaCorrente(numero, titular, saldoInicial));
+        }
+        IO.println("Contas carregadas: ");
+        listarContas();
+        return contasCorrentes;
     }
 
     public void solicitaSaque(ContaCorrente conta, double valor) throws SaldoInsuficienteException {
         conta.sacar(valor);
     }
     
-    public void atualizaConta (ContaCorrente conta, String caminho) throws IOException {
+    public void atualizaContas(ContaCorrente conta, String caminho) throws IOException {
         Path path = Paths.get(caminho);
-        String dadosAtualizados = conta.getNumero()+", "+conta.getTitular()+", "+conta.getSaldo();
-        Files.write(path, dadosAtualizados.getBytes());
+        String dadosAtualizados = conta.getNumero() + ", " + conta.getTitular() + ", " + conta.getSaldo();
+        Files.writeString(path, dadosAtualizados);
+    }
     
+    public List<ContaCorrente> getContasCorrentes(){
+        return contasCorrentes;
     }
 }

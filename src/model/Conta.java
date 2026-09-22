@@ -47,8 +47,8 @@ public abstract class Conta {
     }
 
     public Conta(int numero, String titular, double saldo) {
-        this.numero = numero;
+        this.numero  = numero ;
         this.titular = titular;
-        this.saldo = saldo;
+        this.saldo   = saldo  ;
     }
 }

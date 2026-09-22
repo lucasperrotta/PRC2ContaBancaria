@@ -1,1 +1,3 @@
 0, 'Lucas Perrotta Barbosa', 420000
+1, 'Amanda Perrotta Barbosa', 840000
+2, 'Fabiana Perrotta', 420000000
