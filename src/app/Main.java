@@ -1,42 +1,43 @@
 package app;
 
+import dao.ContaDAO;
 import model.ContaCorrente;
-import service.ContaService;
-import exception.SaldoInsuficienteException;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        IO.println("=== TESTE AULA 05 - JDBC ===");
-        ContaService cs = new ContaService();
+        ContaDAO dao = new ContaDAO();
 
-        // 1. Testar Listagem (Já carrega no construtor)
-        cs.listarContas();
+        try {
+            System.out.println("=== TESTE AULA 06 - TRANSAÇÕES ===\n");
 
-        // 2. Testar Inserção
-        IO.println("\n--- Inserindo nova conta ---");
-        cs.addConta(new ContaCorrente(1004, "Ana Souza", 5000.00));
+            // 1. Listar estado inicial
+            System.out.println("--- Estado Inicial ---");
+            dao.listarTodas().forEach(c -> System.out.println(c.getTitular() + ": R$ " + c.getSaldo()));
 
-        // 3. Testar Depósito e Saque (Atualiza o BD)
-        IO.println("\n--- Operações ---");
-        ContaCorrente contaLucas = cs.buscarConta(1001);
-        if (contaLucas != null) {
-            cs.solicitaDeposito(contaLucas, 1000.00);
-            
+            // 2. Transferência com SUCESSO (Lucas tem 5000, vai enviar 1000 para Maria)
+            System.out.println("\n--- Tentando transferência válida (R$ 1000) ---");
+            dao.transferir(1001, 1002, 1000.00);
+
+            // 3. Transferência com FALHA (Rollback) - Lucas tenta enviar 99999 (não tem saldo)
+            System.out.println("\n--- Tentando transferência INVÁLIDA (R$ 99999) ---");
             try {
-                cs.solicitaSaque(contaLucas, 500.00);
-            } catch (SaldoInsuficienteException e) {
-                IO.println("Erro: " + e.getMessage());
+                dao.transferir(1001, 1002, 99999.00);
+            } catch (Exception e) {
+                System.out.println("Erro esperado: " + e.getMessage());
             }
+
+            // 4. Listar estado final para provar que o Rollback funcionou
+            System.out.println("\n--- Estado Final (Prova do Rollback) ---");
+            List<ContaCorrente> contasFinais = dao.listarTodas();
+            for (ContaCorrente c : contasFinais) {
+                System.out.println(c.getTitular() + ": R$ " + c.getSaldo());
+            }
+            
+            System.out.println("\n💡 Dica: O saldo do Lucas NÃO pode ter mudado na segunda tentativa!");
+
+        } catch (Exception e) {
+            System.err.println("Erro geral: " + e.getMessage());
         }
-
-        // 4. Testar Remoção
-        IO.println("\n--- Removendo conta 1004 ---");
-        cs.removerConta(1004);
-
-        // 5. Listagem Final
-        IO.println("\n--- Estado Final ---");
-        cs.listarContas();
-        
-        IO.println("\n✅ Dica: Dê um SELECT no seu MySQL para confirmar que tudo foi salvo!");
     }
 }

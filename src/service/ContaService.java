@@ -18,7 +18,7 @@ public class ContaService {
 
     private void carregarDoBanco() {
         try {
-            contasCorrentes = dao.listar();
+            contasCorrentes = dao.listarTodas();
             IO.println("✅ " + contasCorrentes.size() + " contas carregadas do Banco de Dados.");
         } catch (SQLException e) {
             IO.println("❌ Erro ao conectar com o banco: " + e.getMessage());
